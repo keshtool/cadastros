@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kesh Bank · Formatador de Planilha</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'><defs><linearGradient id='g' x1='15%25' y1='10%25' x2='90%25' y2='95%25'><stop offset='0%25' stop-color='%23BFEE7A'/><stop offset='55%25' stop-color='%237ED321'/><stop offset='100%25' stop-color='%232E8B2E'/></linearGradient></defs><circle cx='100' cy='100' r='90' fill='black' stroke='url(%23g)' stroke-width='12'/><g fill='url(%23g)'><rect x='56' y='42' width='22' height='118'/><rect x='78' y='90' width='62' height='22'/><rect x='118' y='42' width='22' height='70'/><polygon points='118,112 140,112 162,160 140,160'/></g></svg>">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+<style>
+  :root {
+    --bg: #0a0a0a;
+    --bg-card: #15171a;
+    --bg-card-2: #1c1f24;
+    --border: #2a2e35;
+    --border-soft: #1f2226;
+    --green: #7ED321;
+    --green-bright: #95E844;
+    --green-dark: #2E8B2E;
+    --green-soft: rgba(126, 211, 33, 0.12);
+    --text: #f5f5f5;
+    --text-muted: #9ca3af;
+    --text-soft: #6b7280;
+    --error: #ef4444;
+    --error-bg: rgba(239, 68, 68, 0.08);
+    --error-border: rgba(239, 68, 68, 0.3);
+    --warning: #f59e0b;
+    --warning-bg: rgba(245, 158, 11, 0.08);
+    --warning-border: rgba(245, 158, 11, 0.3);
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  body {
+    background:
+      radial-gradient(circle at 20% 0%, rgba(126, 211, 33, 0.08) 0%, transparent 50%),
+      radial-gradient(circle at 80% 100%, rgba(126, 211, 33, 0.05) 0%, transparent 50%),
+      var(--bg);
+  }
+  .container { max-width: 1100px; margin: 0 auto; padding: 36px 20px 60px; }
+  header { display: flex; flex-direction: column; align-items: center; text-align: center; margin-bottom: 36px; }
+  .logo-block { display: flex; align-items: center; gap: 16px; margin-bottom: 8px; }
+  .logo-mark { width: 56px; height: 56px; flex-shrink: 0; }
+  .logo-text { text-align: left; }
+  .logo-title { font-size: 32px; font-weight: 800; letter-spacing: -0.5px; color: white; line-height: 1; }
+  .logo-tagline { font-size: 11px; font-weight: 700; letter-spacing: 2px; color: white; margin-top: 6px; }
+  .logo-tagline span { color: var(--green-bright); }
+  h1 { font-size: 22px; font-weight: 600; color: var(--text); margin: 18px 0 6px; }
+  .subtitle { color: var(--text-muted); font-size: 15px; margin: 0; max-width: 620px; }
+  .card { background: var(--bg-card); border: 1px solid var(--border-soft); border-radius: 14px; padding: 26px; margin-bottom: 18px; box-shadow: 0 1px 3px rgba(0,0,0,0.4); }
+  .dropzone { border: 2px dashed var(--border); border-radius: 12px; padding: 56px 20px; text-align: center; cursor: pointer; transition: all 0.2s ease; background: var(--bg-card-2); }
+  .dropzone:hover, .dropzone.drag-over { border-color: var(--green); background: var(--green-soft); transform: translateY(-1px); }
+  .dropzone-icon { width: 64px; height: 64px; margin: 0 auto 14px; color: var(--green); }
+  .dropzone p { margin: 6px 0; color: var(--text); }
+  .dropzone p strong { color: var(--green-bright); font-size: 17px; }
+  .dropzone .hint { color: var(--text-muted); font-size: 14px; }
+  .btn { background: var(--green); color: #0a0a0a; border: none; padding: 12px 22px; border-radius: 9px; font-size: 15px; font-weight: 700; cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; gap: 8px; letter-spacing: 0.2px; }
+  .btn:hover { background: var(--green-bright); transform: translateY(-1px); box-shadow: 0 4px 14px rgba(126, 211, 33, 0.25); }
+  .btn-secondary { background: var(--bg-card-2); color: var(--text-muted); border: 1px solid var(--border); padding: 8px 14px; font-size: 13px; font-weight: 600; }
+  .btn-secondary:hover { background: var(--border); color: var(--text); box-shadow: none; }
+  .summary { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 22px; }
+  .stat { padding: 18px 12px; border-radius: 10px; text-align: center; border: 1px solid var(--border-soft); background: var(--bg-card-2); }
+  .stat-total .stat-num { color: var(--text); }
+  .stat-ok .stat-num { color: var(--green-bright); }
+  .stat-warning .stat-num { color: var(--warning); }
+  .stat-error .stat-num { color: var(--error); }
+  .stat-num { font-size: 30px; font-weight: 800; line-height: 1; }
+  .stat-label { font-size: 12px; margin-top: 6px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+  .errors-list { max-height: 480px; overflow-y: auto; padding-right: 4px; }
+  .errors-list::-webkit-scrollbar { width: 8px; }
+  .errors-list::-webkit-scrollbar-track { background: var(--bg-card-2); border-radius: 4px; }
+  .errors-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+  .error-row { padding: 14px 16px; margin-bottom: 10px; border-radius: 10px; border-left: 4px solid; background: var(--bg-card-2); }
+  .error-row.error { background: var(--error-bg); border-color: var(--error); }
+  .error-row.warning { background: var(--warning-bg); border-color: var(--warning); }
+  .error-row .row-title { font-weight: 700; color: var(--text); margin-bottom: 8px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 14px; }
+  .row-name { color: var(--text-muted); font-weight: 500; }
+  .badge { display: inline-block; padding: 3px 9px; border-radius: 12px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; }
+  .badge-error { background: var(--error); color: white; }
+  .badge-warning { background: var(--warning); color: #1a1a1a; }
+  .issue { display: block; padding: 4px 0; padding-left: 22px; position: relative; font-size: 13px; color: var(--text-muted); }
+  .issue::before { content: ''; position: absolute; left: 8px; top: 11px; width: 5px; height: 5px; border-radius: 50%; }
+  .issue.err { color: #fca5a5; }
+  .issue.err::before { background: var(--error); }
+  .issue.warn { color: #fcd34d; }
+  .issue.warn::before { background: var(--warning); }
+  table { width: 100%; border-collapse: collapse; font-size: 12px; color: var(--text); }
+  th { background: #0a0c0e; color: var(--green-bright); padding: 10px 8px; text-align: left; border-bottom: 1px solid var(--border); white-space: nowrap; font-weight: 700; font-size: 10px; letter-spacing: 0.6px; text-transform: uppercase; position: sticky; top: 0; }
+  td { padding: 8px; border-bottom: 1px solid var(--border-soft); white-space: nowrap; max-width: 200px; overflow: hidden; text-overflow: ellipsis; color: var(--text); }
+  tr.row-error td { background: var(--error-bg); }
+  tr.row-warning td { background: var(--warning-bg); }
+  tr:hover td { background: var(--bg-card-2); }
+  tr.row-error:hover td { background: rgba(239, 68, 68, 0.15); }
+  tr.row-warning:hover td { background: rgba(245, 158, 11, 0.15); }
+  .preview-wrap { overflow: auto; max-height: 380px; border: 1px solid var(--border-soft); border-radius: 8px; background: var(--bg-card-2); }
+  .preview-wrap::-webkit-scrollbar { height: 8px; width: 8px; }
+  .preview-wrap::-webkit-scrollbar-track { background: var(--bg-card); }
+  .preview-wrap::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+  .actions { display: flex; gap: 14px; flex-wrap: wrap; align-items: center; }
+  .file-info { background: var(--bg-card-2); border: 1px solid var(--border-soft); padding: 12px 16px; border-radius: 8px; margin-bottom: 18px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+  .file-info-name { font-weight: 600; color: var(--green-bright); display: flex; align-items: center; gap: 8px; font-size: 14px; }
+  .hidden { display: none !important; }
+  h3 { margin-top: 0; color: var(--text); font-size: 17px; font-weight: 700; }
+  .info-text { color: var(--text-muted); font-size: 13.5px; margin: 0 0 14px; line-height: 1.5; }
+  .mapping-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 8px; font-size: 13px; }
+  .mapping-item { padding: 8px 12px; background: var(--bg-card-2); border-radius: 6px; border-left: 3px solid var(--border); }
+  .mapping-item.found { border-left-color: var(--green); }
+  .mapping-item.missing { border-left-color: var(--error); background: var(--error-bg); }
+  .mapping-item .label { font-weight: 700; color: var(--text); font-size: 13px; }
+  .mapping-item .source { color: var(--text-muted); font-size: 11.5px; margin-top: 2px; }
+  details { margin-top: 14px; }
+  details summary { cursor: pointer; color: var(--green); font-weight: 500; padding: 6px 0; font-size: 14px; list-style: none; user-select: none; }
+  details summary::-webkit-details-marker { display: none; }
+  details summary::before { content: '▸ '; }
+  details[open] summary::before { content: '▾ '; }
+  details summary:hover { color: var(--green-bright); }
+  details > div { color: var(--text-muted); font-size: 13px; padding: 10px 0 0; line-height: 1.6; }
+  details strong { color: var(--text); }
+  footer { text-align: center; color: var(--text-soft); font-size: 12px; margin-top: 22px; }
+  footer .footer-mark { color: var(--green); font-weight: 700; }
+  @media (max-width: 640px) { .summary { grid-template-columns: repeat(2, 1fr); } .logo-title { font-size: 26px; } .card { padding: 20px; } }
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <div class="logo-block">
+      <svg class="logo-mark" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <defs>
+          <linearGradient id="kGrad" x1="15%" y1="10%" x2="90%" y2="95%">
+            <stop offset="0%" stop-color="#BFEE7A"/>
+            <stop offset="55%" stop-color="#7ED321"/>
+            <stop offset="100%" stop-color="#2E8B2E"/>
+          </linearGradient>
+        </defs>
+        <circle cx="100" cy="100" r="90" fill="none" stroke="url(#kGrad)" stroke-width="12"/>
+        <g fill="url(#kGrad)">
+          <rect x="56" y="42" width="22" height="118"/>
+          <rect x="78" y="90" width="62" height="22"/>
+          <rect x="118" y="42" width="22" height="70"/>
+          <polygon points="118,112 140,112 162,160 140,160"/>
+        </g>
+      </svg>
+      <div class="logo-text">
+        <div class="logo-title">KESHBANK</div>
+        <div class="logo-tagline">BANCO DO <span>COLABORADOR</span></div>
+      </div>
+    </div>
+    <h1>Formatador de Planilha de Colaboradores</h1>
+    <p class="subtitle">Envie a planilha em CSV ou Excel — vamos padronizar, validar e gerar o arquivo pronto para envio.</p>
+  </header>
+
+  <div id="upload-section" class="card">
+    <div id="dropzone" class="dropzone">
+      <svg class="dropzone-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+        <polyline points="17 8 12 3 7 8"/>
+        <line x1="12" y1="3" x2="12" y2="15"/>
+      </svg>
+      <p><strong>Clique aqui ou arraste sua planilha</strong></p>
+      <p class="hint">Formatos aceitos: .csv, .xlsx, .xls</p>
+      <input type="file" id="file-input" class="hidden" accept=".csv,.xlsx,.xls">
+    </div>
+    <details>
+      <summary>Quais colunas a planilha precisa ter?</summary>
+      <div>
+        <p>A ferramenta reconhece automaticamente colunas com os seguintes nomes (ou variações com acento, caixa alta/baixa, espaços):</p>
+        <p><strong>NOME</strong>, <strong>CPF/CNPJ</strong>, <strong>NOME_MAE</strong>, <strong>DATA_NASCIMENTO</strong>, <strong>E-MAIL</strong>, <strong>CELULAR</strong>, <strong>SALARIO</strong>, <strong>LOTACAO</strong>, <strong>CEP</strong>, <strong>PAIS</strong>, <strong>ESTADO</strong>, <strong>CIDADE</strong>, <strong>BAIRRO</strong>, <strong>RUA</strong>, <strong>NUMERO</strong>, <strong>COMPLEMENTO</strong>, <strong>DATA_ADMISSAO</strong>.</p>
+        <p>Correções automáticas: coluna OPERACAO sempre vira "NOVO"; estados como "São Paulo" viram "SP"; país em branco vira "BRASIL"; acentos e cedilha são removidos do resultado final. Lotação é opcional.</p>
+      </div>
+    </details>
+  </div>
+
+  <div id="result-section" class="hidden">
+    <div class="card">
+      <div class="file-info">
+        <div class="file-info-name">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          <span id="file-name"></span>
+        </div>
+        <button class="btn btn-secondary" onclick="resetApp()">Trocar arquivo</button>
+      </div>
+
+      <div class="summary">
+        <div class="stat stat-total"><div class="stat-num" id="stat-total">0</div><div class="stat-label">Total de linhas</div></div>
+        <div class="stat stat-ok"><div class="stat-num" id="stat-ok">0</div><div class="stat-label">Sem problemas</div></div>
+        <div class="stat stat-warning"><div class="stat-num" id="stat-warning">0</div><div class="stat-label">Com avisos</div></div>
+        <div class="stat stat-error"><div class="stat-num" id="stat-error">0</div><div class="stat-label">Com erros</div></div>
+      </div>
+
+      <div class="actions">
+        <button class="btn" onclick="downloadCSV()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Baixar CSV formatado
+        </button>
+        <span id="download-hint" style="font-size:13px;"></span>
+      </div>
+    </div>
+
+    <div id="mapping-section" class="card hidden">
+      <h3>Mapeamento de colunas detectado</h3>
+      <p class="info-text">Confira se todas as colunas da planilha foram reconhecidas corretamente.</p>
+      <div id="mapping-grid" class="mapping-grid"></div>
+    </div>
+
+    <div id="errors-section" class="card hidden">
+      <h3>Problemas encontrados</h3>
+      <p class="info-text">Revise as linhas abaixo. O arquivo final será gerado mesmo com avisos, mas é recomendado corrigir os erros antes de enviar.</p>
+      <div id="errors-list" class="errors-list"></div>
+    </div>
+
+    <div class="card">
+      <h3>Pré-visualização do resultado</h3>
+      <p class="info-text">Linhas em vermelho contêm erros, em amarelo contêm avisos.</p>
+      <div class="preview-wrap"><table id="preview-table"></table></div>
+    </div>
+  </div>
+
+  <footer><span class="footer-mark">KESHBANK</span> · Ferramenta interna · Processamento 100% local — nenhum dado é enviado para servidores</footer>
+</div>
+
+<script>
+'use strict';
+
+const STANDARD_COLUMNS = ['OPERACAO','NOME','CPF/CNPJ','NOME_MAE','DATA_NASCIMENTO','E-MAIL','CELULAR','SALARIO','LOTACAO','CEP','PAIS','ESTADO','CIDADE','BAIRRO','RUA','NUMERO','COMPLEMENTO','DATA_ADMISSAO'];
+
+const COLUMN_SYNONYMS = {
+  'OPERACAO': ['operacao','op','tipo','tipooperacao'],
+  'NOME': ['nome','nomecompleto','nomedocolaborador','colaborador','nomefuncionario','funcionario'],
+  'CPF/CNPJ': ['cpf','cnpj','cpfcnpj','cpfoucnpj','documento','doc'],
+  'NOME_MAE': ['nomemae','nomedamae','mae'],
+  'DATA_NASCIMENTO': ['datanascimento','datadenascimento','dtnascimento','nascimento','dn','dtnasc','datanasc'],
+  'E-MAIL': ['email','mail','correioeletronico','correio'],
+  'CELULAR': ['celular','telefone','tel','cel','telefonecelular','fone','telcel','telcelular'],
+  'SALARIO': ['salario','remuneracao','sal'],
+  'LOTACAO': ['lotacao','empresa','departamento','setor','unidade'],
+  'CEP': ['cep','codigopostal','codpostal'],
+  'PAIS': ['pais'],
+  'ESTADO': ['estado','uf','siglaestado'],
+  'CIDADE': ['cidade','municipio'],
+  'BAIRRO': ['bairro'],
+  'RUA': ['rua','logradouro','endereco','rualogradouro'],
+  'NUMERO': ['numero','num','n','numeroendereco'],
+  'COMPLEMENTO': ['complemento','compl','complend'],
+  'DATA_ADMISSAO': ['dataadmissao','datadeadmissao','dtadmissao','admissao']
+};
+
+const UF_MAP = {
+  'AC':'AC','ACRE':'AC','AL':'AL','ALAGOAS':'AL','AP':'AP','AMAPA':'AP',
+  'AM':'AM','AMAZONAS':'AM','BA':'BA','BAHIA':'BA','CE':'CE','CEARA':'CE',
+  'DF':'DF','DISTRITOFEDERAL':'DF','ES':'ES','ESPIRITOSANTO':'ES',
+  'GO':'GO','GOIAS':'GO','MA':'MA','MARANHAO':'MA','MT':'MT','MATOGROSSO':'MT',
+  'MS':'MS','MATOGROSSODOSUL':'MS','MG':'MG','MINASGERAIS':'MG',
+  'PA':'PA','PARA':'PA','PB':'PB','PARAIBA':'PB','PR':'PR','PARANA':'PR',
+  'PE':'PE','PERNAMBUCO':'PE','PI':'PI','PIAUI':'PI','RJ':'RJ','RIODEJANEIRO':'RJ',
+  'RN':'RN','RIOGRANDEDONORTE':'RN','RS':'RS','RIOGRANDEDOSUL':'RS',
+  'RO':'RO','RONDONIA':'RO','RR':'RR','RORAIMA':'RR','SC':'SC','SANTACATARINA':'SC',
+  'SP':'SP','SAOPAULO':'SP','SE':'SE','SERGIPE':'SE','TO':'TO','TOCANTINS':'TO'
+};
+
+const PAIS_BRASIL_VARIANTS = new Set(['', 'BR', 'BRA', 'BRAZIL', 'BRASIL']);
+
+let processedResults = [];
+let detectedHeaders = [];
+let detectedMap = {};
+let originalFileName = '';
+
+function stripAccents(s) {
+  return String(s == null ? '' : s)
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '');
+}
+
+function normalize(s) {
+  return stripAccents(s).toLowerCase().replace(/[^a-z0-9]/g, '');
+}
+
+function mapHeaders(headers) {
+  const map = {};
+  const used = new Set();
+  headers.forEach((h, i) => {
+    const norm = normalize(h);
+    if (!norm) return;
+    for (const std of STANDARD_COLUMNS) {
+      if (used.has(std)) continue;
+      if ((COLUMN_SYNONYMS[std] || []).includes(norm)) {
+        map[std] = i;
+        used.add(std);
+        return;
+      }
+    }
+  });
+  return map;
+}
+
+function parseDate(s) {
+  if (s instanceof Date && !isNaN(s)) return s;
+  s = String(s == null ? '' : s).trim();
+  if (!s) return null;
+  // dd/mm/yyyy ou dd-mm-yyyy ou dd.mm.yyyy
+  let m = s.match(/^(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{2,4})$/);
+  if (m) {
+    let d = parseInt(m[1], 10);
+    let mo = parseInt(m[2], 10);
+    let y = parseInt(m[3], 10);
+    if (y < 100) y += (y < 30 ? 2000 : 1900);
+    if (mo < 1 || mo > 12 || d < 1 || d > 31) return null;
+    const dt = new Date(y, mo - 1, d);
+    if (dt.getFullYear() !== y || dt.getMonth() !== mo - 1 || dt.getDate() !== d) return null;
+    return dt;
+  }
+  // yyyy-mm-dd (ISO)
+  m = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+  if (m) {
+    const y = parseInt(m[1], 10);
+    const mo = parseInt(m[2], 10);
+    const d = parseInt(m[3], 10);
+    if (mo < 1 || mo > 12 || d < 1 || d > 31) return null;
+    const dt = new Date(y, mo - 1, d);
+    if (dt.getFullYear() !== y || dt.getMonth() !== mo - 1 || dt.getDate() !== d) return null;
+    return dt;
+  }
+  return null;
+}
+
+function formatDate(dt) {
+  if (!dt || isNaN(dt)) return '';
+  const d = String(dt.getDate()).padStart(2, '0');
+  const m = String(dt.getMonth() + 1).padStart(2, '0');
+  const y = dt.getFullYear();
+  return d + '/' + m + '/' + y;
+}
+
+function ageInYears(birth, now) {
+  let age = now.getFullYear() - birth.getFullYear();
+  const m = now.getMonth() - birth.getMonth();
+  if (m < 0 || (m === 0 && now.getDate() < birth.getDate())) age--;
+  return age;
+}
+
+function isValidEmail(e) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(e);
+}
+
+function normalizeUF(s) {
+  const cleaned = stripAccents(s).toUpperCase().replace(/[^A-Z\s]/g, '').trim();
+  if (!cleaned) return '';
+  const noSpace = cleaned.replace(/\s+/g, '');
+  return UF_MAP[noSpace] || cleaned;
+}
+
+function normalizePais(s) {
+  const cleaned = stripAccents(s).toUpperCase().trim();
+  if (PAIS_BRASIL_VARIANTS.has(cleaned)) return 'BRASIL';
+  return cleaned;
+}
+
+function processRow(rawRow, headerMap, rowIndex) {
+  const errors = [];
+  const warnings = [];
+  const out = {};
+
+  function get(field) {
+    const idx = headerMap[field];
+    if (idx === undefined) return '';
+    let v = rawRow[idx];
+    if (v == null) return '';
+    if (v instanceof Date) return formatDate(v);
+    if (typeof v === 'number') {
+      // Mantém número como string sem notação científica (importante para CPF/CEP)
+      if (Number.isInteger(v)) return String(v);
+      return String(v);
+    }
+    return String(v).trim();
+  }
+
+  function getRaw(field) {
+    const idx = headerMap[field];
+    if (idx === undefined) return null;
+    return rawRow[idx];
+  }
+
+  out['OPERACAO'] = 'NOVO';
+
+  out['NOME'] = stripAccents(get('NOME')).toUpperCase();
+  if (!out['NOME']) errors.push('Nome não preenchido');
+
+  let cpf = get('CPF/CNPJ').replace(/\D/g, '');
+  if (!cpf) {
+    errors.push('CPF/CNPJ não preenchido');
+  } else if (cpf.length === 10) {
+    // Excel removeu o zero à esquerda — corrige silenciosamente
+    cpf = '0' + cpf;
+  } else if (cpf.length === 13) {
+    // CNPJ com zero à esquerda removido — corrige silenciosamente
+    cpf = '0' + cpf;
+  } else if (cpf.length !== 11 && cpf.length !== 14) {
+    errors.push('CPF/CNPJ com ' + cpf.length + ' dígitos (esperado 11 para CPF ou 14 para CNPJ)');
+  }
+  out['CPF/CNPJ'] = cpf;
+
+  out['NOME_MAE'] = stripAccents(get('NOME_MAE')).toUpperCase();
+  if (!out['NOME_MAE']) errors.push('Nome da mãe não preenchido');
+
+  // DATA_NASCIMENTO — usa raw para pegar Date object diretamente
+  const dnRaw = getRaw('DATA_NASCIMENTO');
+  if (dnRaw == null || dnRaw === '') {
+    errors.push('Data de nascimento não preenchida');
+    out['DATA_NASCIMENTO'] = '';
+  } else {
+    let parsed = null;
+    if (dnRaw instanceof Date && !isNaN(dnRaw)) {
+      parsed = dnRaw;
+    } else {
+      parsed = parseDate(String(dnRaw));
+    }
+    if (!parsed) {
+      errors.push('Data de nascimento em formato inválido (recebido: "' + dnRaw + '")');
+      out['DATA_NASCIMENTO'] = String(dnRaw);
+    } else {
+      const now = new Date();
+      const age = ageInYears(parsed, now);
+      if (parsed > now) {
+        errors.push('Data de nascimento no futuro (' + formatDate(parsed) + ')');
+      } else if (age < 13) {
+        errors.push('Colaborador com idade menor que 13 anos (' + age + ' anos — nasceu em ' + formatDate(parsed) + ')');
+      } else if (age > 120) {
+        errors.push('Idade improvável: ' + age + ' anos');
+      }
+      out['DATA_NASCIMENTO'] = formatDate(parsed);
+    }
+  }
+
+  const email = stripAccents(get('E-MAIL')).toLowerCase();
+  out['E-MAIL'] = email;
+  if (!email) errors.push('E-mail não preenchido');
+  else if (!isValidEmail(email)) errors.push('E-mail em formato inválido (recebido: "' + email + '")');
+
+  const cel = get('CELULAR').replace(/\D/g, '');
+  out['CELULAR'] = cel;
+  if (!cel) errors.push('Celular não preenchido');
+  else if (cel.length < 10) errors.push('Celular com poucos dígitos: ' + cel.length + ' (esperado 10 ou 11)');
+  else if (cel.length > 11) errors.push('Celular com dígitos a mais: ' + cel.length + ' (esperado 10 ou 11)');
+
+  const salRaw = get('SALARIO');
+  let salario = salRaw.replace(/r\$/i, '').replace(/\s/g, '');
+  if (!salario) {
+    errors.push('Salário não preenchido');
+    out['SALARIO'] = '';
+  } else {
+    const hasComma = salario.includes(',');
+    const hasDot = salario.includes('.');
+    if (hasComma) {
+      salario = salario.replace(/\./g, '');
+    } else if (hasDot) {
+      const parts = salario.split('.');
+      if (parts.length === 2 && parts[1].length >= 1 && parts[1].length <= 2) {
+        salario = parts[0] + ',' + parts[1].padEnd(2, '0');
+      } else {
+        salario = salario.replace(/\./g, '');
+      }
+    }
+    if (!/^\d+(,\d{1,2})?$/.test(salario)) {
+      errors.push('Salário em formato inválido (recebido: "' + salRaw + '")');
+    } else {
+      const valor = parseFloat(salario.replace(',', '.'));
+      if (valor <= 0) errors.push('Salário deve ser maior que zero');
+    }
+    out['SALARIO'] = salario;
+  }
+
+  // LOTACAO opcional
+  out['LOTACAO'] = stripAccents(get('LOTACAO')).toUpperCase();
+
+  let cep = get('CEP').replace(/\D/g, '');
+  if (!cep) {
+    errors.push('CEP não preenchido');
+  } else if (cep.length < 8 && cep.length >= 5) {
+    // Excel removeu zeros à esquerda — corrige silenciosamente
+    cep = cep.padStart(8, '0');
+  } else if (cep.length !== 8) {
+    errors.push('CEP com ' + cep.length + ' dígitos (esperado 8)');
+  }
+  out['CEP'] = cep;
+
+  out['PAIS'] = normalizePais(get('PAIS'));
+
+  const ufNorm = normalizeUF(get('ESTADO'));
+  out['ESTADO'] = ufNorm;
+  if (!ufNorm) errors.push('Estado não preenchido');
+  else if (ufNorm.length !== 2) errors.push('Estado não reconhecido: "' + get('ESTADO') + '"');
+
+  out['CIDADE'] = stripAccents(get('CIDADE')).toUpperCase();
+  if (!out['CIDADE']) errors.push('Cidade não preenchida');
+  out['BAIRRO'] = stripAccents(get('BAIRRO')).toUpperCase();
+  if (!out['BAIRRO']) errors.push('Bairro não preenchido');
+  out['RUA'] = stripAccents(get('RUA')).toUpperCase();
+  if (!out['RUA']) errors.push('Rua/Logradouro não preenchido');
+  out['NUMERO'] = stripAccents(get('NUMERO'));
+  if (!out['NUMERO']) errors.push('Número do endereço não preenchido');
+  out['COMPLEMENTO'] = stripAccents(get('COMPLEMENTO'));
+
+  // DATA_ADMISSAO — usa raw para pegar Date object diretamente
+  const daRaw = getRaw('DATA_ADMISSAO');
+  if (daRaw == null || daRaw === '') {
+    errors.push('Data de admissão não preenchida');
+    out['DATA_ADMISSAO'] = '';
+  } else {
+    let parsed = null;
+    if (daRaw instanceof Date && !isNaN(daRaw)) {
+      parsed = daRaw;
+    } else {
+      parsed = parseDate(String(daRaw));
+    }
+    if (!parsed) {
+      errors.push('Data de admissão em formato inválido (recebido: "' + daRaw + '")');
+      out['DATA_ADMISSAO'] = String(daRaw);
+    } else {
+      const now = new Date();
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      const days = (parsed - today) / (1000 * 60 * 60 * 24);
+      if (days > 7) {
+        errors.push('Data de admissão mais de 1 semana no futuro (' + formatDate(parsed) + ')');
+      }
+      out['DATA_ADMISSAO'] = formatDate(parsed);
+    }
+  }
+
+  return {
+    rowIndex: rowIndex,
+    name: out['NOME'] || '(sem nome)',
+    out: out,
+    errors: errors,
+    warnings: warnings
+  };
+}
+
+function detectSeparator(text) {
+  const firstLines = text.split(/\r?\n/).slice(0, 3).join('\n');
+  const semi = (firstLines.match(/;/g) || []).length;
+  const comma = (firstLines.match(/,/g) || []).length;
+  const tab = (firstLines.match(/\t/g) || []).length;
+  if (tab > semi && tab > comma) return '\t';
+  if (semi >= comma) return ';';
+  return ',';
+}
+
+async function handleFile(file) {
+  originalFileName = file.name;
+  const ext = (file.name.split('.').pop() || '').toLowerCase();
+  let rows;
+
+  try {
+    if (ext === 'csv' || ext === 'txt') {
+      const text = await file.text();
+      const sep = detectSeparator(text);
+      const parsed = Papa.parse(text, { delimiter: sep, skipEmptyLines: true });
+      rows = parsed.data;
+    } else if (ext === 'xlsx' || ext === 'xls' || ext === 'xlsm') {
+      const buf = await file.arrayBuffer();
+      const wb = XLSX.read(buf, { type: 'array', cellDates: true });
+      const sheet = wb.Sheets[wb.SheetNames[0]];
+      // raw:true mantém datas como objeto Date e números como Number,
+      // evitando que o Excel devolva datas em formato americano (4/22/26)
+      rows = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: '', raw: true });
+    } else {
+      alert('Formato não suportado. Envie um arquivo .csv, .xlsx ou .xls');
+      return;
+    }
+  } catch (err) {
+    alert('Erro ao ler o arquivo: ' + err.message);
+    return;
+  }
+
+  if (!rows || rows.length < 2) {
+    alert('A planilha está vazia ou não tem dados além do cabeçalho.');
+    return;
+  }
+
+  let headerIdx = 0;
+  while (headerIdx < rows.length && rows[headerIdx].every(c => !String(c == null ? '' : c).trim())) {
+    headerIdx++;
+  }
+  const headers = rows[headerIdx];
+  const dataRows = rows.slice(headerIdx + 1).filter(r => r.some(c => {
+    if (c == null) return false;
+    if (c instanceof Date) return true;
+    return String(c).trim() !== '';
+  }));
+
+  detectedHeaders = headers;
+  detectedMap = mapHeaders(headers);
+
+  processedResults = dataRows.map((row, i) => processRow(row, detectedMap, i + headerIdx + 2));
+  renderResults();
+}
+
+function renderResults() {
+  document.getElementById('upload-section').classList.add('hidden');
+  document.getElementById('result-section').classList.remove('hidden');
+  document.getElementById('file-name').textContent = originalFileName;
+
+  const total = processedResults.length;
+  const withErrors = processedResults.filter(r => r.errors.length > 0).length;
+  const withWarnings = processedResults.filter(r => r.warnings.length > 0 && r.errors.length === 0).length;
+  const ok = total - withErrors - withWarnings;
+
+  document.getElementById('stat-total').textContent = total;
+  document.getElementById('stat-ok').textContent = ok;
+  document.getElementById('stat-warning').textContent = withWarnings;
+  document.getElementById('stat-error').textContent = withErrors;
+
+  const hint = document.getElementById('download-hint');
+  if (withErrors > 0) {
+    hint.textContent = '⚠ Há linhas com erros — recomendamos corrigir antes de enviar';
+    hint.style.color = '#fca5a5';
+  } else if (withWarnings > 0) {
+    hint.textContent = '✓ Pronto para baixar — alguns ajustes automáticos foram aplicados';
+    hint.style.color = '#fcd34d';
+  } else {
+    hint.textContent = '✓ Todos os registros estão íntegros';
+    hint.style.color = 'var(--green-bright)';
+  }
+
+  renderMapping();
+  renderErrors();
+  renderPreview();
+}
+
+function renderMapping() {
+  const section = document.getElementById('mapping-section');
+  const grid = document.getElementById('mapping-grid');
+  grid.innerHTML = '';
+  let hasMissing = false;
+  STANDARD_COLUMNS.forEach(std => {
+    if (std === 'OPERACAO' || std === 'COMPLEMENTO' || std === 'PAIS' || std === 'LOTACAO') return;
+    const idx = detectedMap[std];
+    const item = document.createElement('div');
+    item.className = 'mapping-item ' + (idx !== undefined ? 'found' : 'missing');
+    if (idx === undefined) hasMissing = true;
+    item.innerHTML = '<div class="label">' + std + '</div>' +
+      '<div class="source">' + (idx !== undefined ? '← ' + escapeHtml(detectedHeaders[idx] || '(coluna ' + (idx + 1) + ')') : 'NÃO ENCONTRADA') + '</div>';
+    grid.appendChild(item);
+  });
+  if (hasMissing) section.classList.remove('hidden');
+  else section.classList.add('hidden');
+}
+
+function renderErrors() {
+  const section = document.getElementById('errors-section');
+  const list = document.getElementById('errors-list');
+  list.innerHTML = '';
+  const problematic = processedResults.filter(r => r.errors.length > 0 || r.warnings.length > 0);
+  if (problematic.length === 0) { section.classList.add('hidden'); return; }
+  section.classList.remove('hidden');
+  problematic.forEach(r => {
+    const div = document.createElement('div');
+    let cls = 'error-row';
+    if (r.errors.length > 0) cls += ' error';
+    else cls += ' warning';
+    div.className = cls;
+    let html = '<div class="row-title">';
+    html += '<span>Linha ' + r.rowIndex + '</span>';
+    html += '<span class="row-name">— ' + escapeHtml(r.name) + '</span>';
+    if (r.errors.length > 0) html += '<span class="badge badge-error">' + r.errors.length + ' erro' + (r.errors.length > 1 ? 's' : '') + '</span>';
+    if (r.warnings.length > 0) html += '<span class="badge badge-warning">' + r.warnings.length + ' aviso' + (r.warnings.length > 1 ? 's' : '') + '</span>';
+    html += '</div>';
+    r.errors.forEach(e => { html += '<span class="issue err">' + escapeHtml(e) + '</span>'; });
+    r.warnings.forEach(w => { html += '<span class="issue warn">' + escapeHtml(w) + '</span>'; });
+    div.innerHTML = html;
+    list.appendChild(div);
+  });
+}
+
+function renderPreview() {
+  const table = document.getElementById('preview-table');
+  let html = '<thead><tr><th>Linha</th>';
+  STANDARD_COLUMNS.forEach(c => { html += '<th>' + c + '</th>'; });
+  html += '</tr></thead><tbody>';
+  processedResults.forEach(r => {
+    let cls = '';
+    if (r.errors.length > 0) cls = 'row-error';
+    else if (r.warnings.length > 0) cls = 'row-warning';
+    html += '<tr class="' + cls + '"><td>' + r.rowIndex + '</td>';
+    STANDARD_COLUMNS.forEach(c => {
+      html += '<td title="' + escapeHtml(r.out[c] || '') + '">' + escapeHtml(r.out[c] || '') + '</td>';
+    });
+    html += '</tr>';
+  });
+  html += '</tbody>';
+  table.innerHTML = html;
+}
+
+function escapeHtml(s) {
+  return String(s == null ? '' : s)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
+function generateCSV() {
+  const sep = ';';
+  function escape(v) {
+    v = String(v == null ? '' : v);
+    if (v.includes(sep) || v.includes('"') || v.includes('\n') || v.includes('\r')) {
+      return '"' + v.replace(/"/g, '""') + '"';
+    }
+    return v;
+  }
+  let csv = STANDARD_COLUMNS.join(sep) + '\r\n';
+  processedResults.forEach(r => {
+    csv += STANDARD_COLUMNS.map(c => escape(r.out[c] || '')).join(sep) + '\r\n';
+  });
+  return csv;
+}
+
+function downloadCSV() {
+  const csv = generateCSV();
+  const BOM = '﻿';
+  const blob = new Blob([BOM + csv], { type: 'text/csv;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  const baseName = originalFileName.replace(/\.[^.]+$/, '') || 'colaboradores';
+  a.download = baseName + '_formatado.csv';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+function resetApp() {
+  document.getElementById('upload-section').classList.remove('hidden');
+  document.getElementById('result-section').classList.add('hidden');
+  document.getElementById('file-input').value = '';
+  processedResults = [];
+  detectedHeaders = [];
+  detectedMap = {};
+  originalFileName = '';
+}
+
+const dropzone = document.getElementById('dropzone');
+const fileInput = document.getElementById('file-input');
+dropzone.addEventListener('click', () => fileInput.click());
+fileInput.addEventListener('change', e => { if (e.target.files && e.target.files[0]) handleFile(e.target.files[0]); });
+['dragenter','dragover'].forEach(ev => dropzone.addEventListener(ev, e => { e.preventDefault(); e.stopPropagation(); dropzone.classList.add('drag-over'); }));
+['dragleave','drop'].forEach(ev => dropzone.addEventListener(ev, e => { e.preventDefault(); e.stopPropagation(); dropzone.classList.remove('drag-over'); }));
+dropzone.addEventListener('drop', e => { if (e.dataTransfer.files && e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]); });
+</script>
+</body>
+</html>
