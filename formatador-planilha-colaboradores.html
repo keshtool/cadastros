@@ -1018,6 +1018,34 @@ function stripAccents(s) {
     .replace(/[̀-ͯ]/g, '');
 }
 
+const ACCENT_MAP = {
+  'JOAO': 'JOÃO', 'SAO': 'SÃO', 'JOSE': 'JOSÉ', 'ANTONIO': 'ANTÔNIO',
+  'CONCEICAO': 'CONCEIÇÃO', 'ASSUNCAO': 'ASSUNÇÃO', 'ASSUMPCAO': 'ASSUMPÇÃO',
+  'RIBEIRAO': 'RIBEIRÃO', 'MAGALHAES': 'MAGALHÃES', 'GUIMARAES': 'GUIMARÃES',
+  'UNIAO': 'UNIÃO', 'NACAO': 'NAÇÃO', 'FUNDACAO': 'FUNDAÇÃO',
+  'PRODUCAO': 'PRODUÇÃO', 'EDUCACAO': 'EDUCAÇÃO', 'ACAO': 'AÇÃO',
+  'HABITACAO': 'HABITAÇÃO', 'POPULACAO': 'POPULAÇÃO', 'ESTACAO': 'ESTAÇÃO',
+  'ASSOCIACAO': 'ASSOCIAÇÃO', 'SOLUCAO': 'SOLUÇÃO', 'RESOLUCAO': 'RESOLUÇÃO',
+  'INFORMACAO': 'INFORMAÇÃO', 'FEDERACAO': 'FEDERAÇÃO', 'SITUACAO': 'SITUAÇÃO',
+  'PARANA': 'PARANÁ', 'PARAIBA': 'PARAÍBA', 'PIAUI': 'PIAUÍ',
+  'GOIAS': 'GOIÁS', 'MARANHAO': 'MARANHÃO', 'ESPIRITO': 'ESPÍRITO',
+  'FLORIANOPOLIS': 'FLORIANÓPOLIS', 'BRASILIA': 'BRASÍLIA',
+  'PETROPOLIS': 'PETRÓPOLIS', 'MACEIO': 'MACEIÓ', 'NITEROI': 'NITERÓI',
+  'UBERLANDIA': 'UBERLÂNDIA', 'VITORIA': 'VITÓRIA', 'TACAIMBO': 'TACAIMBÓ',
+  'VARZEA': 'VÁRZEA', 'AGUA': 'ÁGUA', 'AGUAS': 'ÁGUAS',
+  'GRACAS': 'GRAÇAS', 'GRACA': 'GRAÇA', 'GLORIA': 'GLÓRIA',
+  'REPUBLICA': 'REPÚBLICA', 'IGUACU': 'IGUAÇU', 'ACUDE': 'AÇUDE',
+  'CANDIDO': 'CÂNDIDO', 'FABRICA': 'FÁBRICA', 'FABIO': 'FÁBIO',
+  'ALCANTARA': 'ALCÂNTARA', 'AMELIA': 'AMÉLIA', 'LEITAO': 'LEITÃO',
+  'FEIJAO': 'FEIJÃO', 'LIMAO': 'LIMÃO', 'CORACAO': 'CORAÇÃO',
+  'ALEM': 'ALÉM', 'TEOFILO': 'TEÓFILO', 'TIMOTEO': 'TIMÓTEO',
+};
+
+function restoreAccents(s) {
+  if (!s) return s;
+  return s.replace(/\b[A-ZÁÀÂÃÉÊÍÓÔÕÚÜÇ]+\b/g, w => ACCENT_MAP[w] || w);
+}
+
 function normalize(s) {
   return stripAccents(s).toLowerCase().replace(/[^a-z0-9]/g, '');
 }
@@ -1230,13 +1258,32 @@ function processRow(rawRow, headerMap, rowIndex) {
   if (!ufNorm) errors.push('Estado não preenchido');
   else if (ufNorm.length !== 2) errors.push('Estado não reconhecido: "' + get('ESTADO') + '"');
 
-  out['CIDADE'] = get('CIDADE').toUpperCase();
+  const cidadeOrig = get('CIDADE').toUpperCase();
+  out['CIDADE'] = restoreAccents(cidadeOrig);
+  if (out['CIDADE'] !== cidadeOrig) warnings.push('Acentuação corrigida (Cidade): "' + cidadeOrig + '" → "' + out['CIDADE'] + '"');
   if (!out['CIDADE']) errors.push('Cidade não preenchida');
-  out['BAIRRO'] = get('BAIRRO').toUpperCase();
+
+  const bairroOrig = get('BAIRRO').toUpperCase();
+  out['BAIRRO'] = restoreAccents(bairroOrig);
+  if (out['BAIRRO'] !== bairroOrig) warnings.push('Acentuação corrigida (Bairro): "' + bairroOrig + '" → "' + out['BAIRRO'] + '"');
   if (!out['BAIRRO']) errors.push('Bairro não preenchido');
-  out['RUA'] = get('RUA').toUpperCase();
+
+  // Separa número embutido no logradouro (ex: "RUA FULANO, 123")
+  let ruaRaw = get('RUA').toUpperCase().trim();
+  let numeroRaw = get('NUMERO') ? String(get('NUMERO')).trim() : '';
+  const ruaNumMatch = ruaRaw.match(/^(.+?),\s*(\d+|S\/N)\s*$/i);
+  if (ruaNumMatch) {
+    const numFromRua = ruaNumMatch[2].trim();
+    const ruaAntes = ruaRaw;
+    ruaRaw = ruaNumMatch[1].trim();
+    if (!numeroRaw || numeroRaw === numFromRua) numeroRaw = numFromRua;
+    warnings.push('Número separado do logradouro: "' + ruaAntes + '" → Rua: "' + ruaRaw + '" / Número: "' + numeroRaw + '"');
+  }
+  const ruaOrig = ruaRaw;
+  out['RUA'] = restoreAccents(ruaRaw);
+  if (out['RUA'] !== ruaOrig) warnings.push('Acentuação corrigida (Rua): "' + ruaOrig + '" → "' + out['RUA'] + '"');
   if (!out['RUA']) errors.push('Rua/Logradouro não preenchido');
-  out['NUMERO'] = get('NUMERO');
+  out['NUMERO'] = numeroRaw;
   if (!out['NUMERO']) errors.push('Número do endereço não preenchido');
   out['COMPLEMENTO'] = get('COMPLEMENTO');
 
