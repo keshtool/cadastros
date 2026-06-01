@@ -12,795 +12,144 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 <style>
   :root {
-    --bg:          #07080e;
-    --bg-card:     #0f1118;
-    --bg-card-2:   #151822;
-    --bg-elevated: #1c2030;
-    --border:      #252b3b;
-    --border-soft: #191e2b;
-    --teal:        #7ED321;
-    --teal-bright: #95E844;
-    --teal-soft:   rgba(126, 211, 33, 0.10);
-    --teal-glow:   rgba(126, 211, 33, 0.20);
-    --violet:      #7b61ff;
-    --violet-soft: rgba(123, 97, 255, 0.10);
-    --text:        #dde3f0;
-    --text-muted:  #6e7a94;
-    --text-soft:   #3e4861;
-    --error:       #ff4d6d;
-    --error-soft:  rgba(255, 77, 109, 0.08);
-    --warning:     #ffb347;
-    --warning-soft:rgba(255, 179, 71, 0.08);
-    --ok:          #7ED321;
-    --ok-soft:     rgba(126, 211, 33, 0.08);
+    --bg: #0a0a0a;
+    --bg-card: #15171a;
+    --bg-card-2: #1c1f24;
+    --border: #2a2e35;
+    --border-soft: #1f2226;
+    --green: #7ED321;
+    --green-bright: #95E844;
+    --green-dark: #2E8B2E;
+    --green-soft: rgba(126, 211, 33, 0.12);
+    --text: #f5f5f5;
+    --text-muted: #9ca3af;
+    --text-soft: #6b7280;
+    --error: #ef4444;
+    --error-bg: rgba(239, 68, 68, 0.08);
+    --error-border: rgba(239, 68, 68, 0.3);
+    --warning: #f59e0b;
+    --warning-bg: rgba(245, 158, 11, 0.08);
+    --warning-border: rgba(245, 158, 11, 0.3);
   }
-
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
+  * { box-sizing: border-box; }
   html, body {
+    margin: 0;
     background: var(--bg);
     color: var(--text);
     min-height: 100vh;
-    font-family: 'Sora', system-ui, sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
     -webkit-font-smoothing: antialiased;
   }
-
   body {
     background:
-      radial-gradient(ellipse 60% 40% at 80% -10%, rgba(123,97,255,0.07) 0%, transparent 60%),
-      radial-gradient(ellipse 50% 35% at 10% 90%, rgba(126,211,33,0.05) 0%, transparent 55%),
+      radial-gradient(circle at 20% 0%, rgba(126, 211, 33, 0.08) 0%, transparent 50%),
+      radial-gradient(circle at 80% 100%, rgba(126, 211, 33, 0.05) 0%, transparent 50%),
       var(--bg);
-    position: relative;
   }
-
-  /* ── Dot grid background ─────────────────────────────────────── */
-  body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background-image: radial-gradient(circle, rgba(255,255,255,0.035) 1px, transparent 1px);
-    background-size: 28px 28px;
-    pointer-events: none;
-    z-index: 0;
-  }
-
-  .container {
-    max-width: 1120px;
-    margin: 0 auto;
-    padding: 48px 24px 72px;
-    position: relative;
-    z-index: 1;
-  }
-
-  /* ── HEADER ──────────────────────────────────────────────────── */
-  header {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-    margin-bottom: 52px;
-    animation: fadeUp 0.6s ease both;
-  }
-
-  .app-icon-wrap {
-    position: relative;
-    width: 76px;
-    height: 76px;
-    margin-bottom: 22px;
-  }
-
-  .app-icon-bg {
-    position: absolute;
-    inset: 0;
-    border-radius: 20px;
-    background: linear-gradient(145deg, rgba(126,211,33,0.18) 0%, rgba(126,211,33,0.06) 100%);
-    border: 1px solid rgba(126,211,33,0.25);
-    box-shadow: 0 0 0 4px rgba(126,211,33,0.06), 0 8px 24px rgba(0,0,0,0.3);
-  }
-
-  .app-icon-emoji {
-    position: relative;
-    z-index: 1;
-    font-size: 38px;
-    line-height: 76px;
-    display: block;
-    text-align: center;
-  }
-
-  header h1,
-  .h1-main {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 4px;
-    font-size: 32px;
-    font-weight: 800;
-    color: var(--text);
-    line-height: 1.15;
-    letter-spacing: -0.7px;
-    margin-bottom: 12px;
-  }
-
-  .h1-sub {
-    font-size: 20px;
-    font-weight: 600;
-    letter-spacing: -0.3px;
-    color: var(--text-muted);
-  }
-
-  .h1-green {
-    background: linear-gradient(90deg, var(--teal) 0%, var(--teal-bright) 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-
-  .subtitle {
-    color: var(--text-muted);
-    font-size: 14px;
-    font-weight: 400;
-    max-width: 460px;
-    line-height: 1.65;
-    margin-bottom: 20px;
-  }
-
+  .container { max-width: 1100px; margin: 0 auto; padding: 36px 20px 60px; }
+  header { display: flex; flex-direction: column; align-items: center; text-align: center; margin-bottom: 36px; }
+  /* ── APP ICON ──────────────────────────────────────────────── */
+  .app-icon-wrap { position: relative; width: 76px; height: 76px; margin-bottom: 22px; }
+  .app-icon-bg { position: absolute; inset: 0; border-radius: 20px; background: linear-gradient(145deg, rgba(126,211,33,0.18) 0%, rgba(126,211,33,0.06) 100%); border: 1px solid rgba(126,211,33,0.25); box-shadow: 0 0 0 4px rgba(126,211,33,0.06), 0 8px 24px rgba(0,0,0,0.3); }
+  .app-icon-emoji { position: relative; z-index: 1; font-size: 38px; line-height: 76px; display: block; text-align: center; }
+  /* ── TÍTULO DUAS LINHAS ─────────────────────────────────────── */
+  header h1, .h1-main { display: flex; flex-direction: column; align-items: center; gap: 4px; font-size: 32px; font-weight: 800; color: var(--text); line-height: 1.15; letter-spacing: -0.7px; margin-bottom: 12px; }
+  .h1-sub { font-size: 20px; font-weight: 600; letter-spacing: -0.3px; color: var(--text-muted); }
+  .h1-green { background: linear-gradient(90deg, var(--green) 0%, #95E844 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
   /* ── STEP FLOW ──────────────────────────────────────────────── */
-  .steps-flow {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    margin-bottom: 0;
-  }
-
-  .step-item {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    padding: 6px 14px;
-    border-radius: 99px;
-    border: 1px solid var(--border-soft);
-    background: var(--bg-card-2);
-    font-size: 12px;
-    font-weight: 600;
-    color: var(--text-soft);
-    transition: all 0.2s;
-  }
-
+  .steps-flow { display: flex; align-items: center; gap: 6px; margin-bottom: 0; }
+  .step-item { display: flex; align-items: center; gap: 6px; padding: 6px 14px; border-radius: 99px; border: 1px solid var(--border-soft); background: var(--bg-card-2); font-size: 12px; font-weight: 600; color: var(--text-soft); transition: all 0.2s; }
   .step-item svg { flex-shrink: 0; }
-
-  .step-item.active {
-    border-color: rgba(126,211,33,0.3);
-    background: rgba(126,211,33,0.08);
-    color: var(--teal-bright);
-  }
-
-  .step-arrow {
-    color: var(--text-soft);
-    font-size: 11px;
-    flex-shrink: 0;
-  }
-
-  .format-pills {
-    display: flex;
-    gap: 6px;
-    flex-wrap: wrap;
-    justify-content: center;
-    margin-top: 12px;
-  }
-
-  .pill {
-    font-size: 10px;
-    font-weight: 700;
-    font-family: 'Fira Code', monospace;
-    letter-spacing: 0.5px;
-    padding: 3px 10px;
-    border-radius: 99px;
-    background: var(--bg-elevated);
-    border: 1px solid var(--border);
-    color: var(--text-soft);
-    text-transform: uppercase;
-  }
-
-  /* ── CARD ────────────────────────────────────────────────────── */
-  .card {
-    background: var(--bg-card);
-    border: 1px solid var(--border-soft);
-    border-radius: 18px;
-    padding: 28px;
-    margin-bottom: 16px;
-    box-shadow:
-      0 1px 2px rgba(0,0,0,0.5),
-      0 0 0 1px rgba(255,255,255,0.025) inset;
-    animation: fadeUp 0.5s ease both;
-  }
-
-  /* ── DROPZONE ────────────────────────────────────────────────── */
-  .dropzone {
-    border: 1.5px dashed var(--border);
-    border-radius: 14px;
-    padding: 52px 24px;
-    text-align: center;
-    cursor: pointer;
-    transition: all 0.25s ease;
-    background: var(--bg-card-2);
-    position: relative;
-    overflow: hidden;
-  }
-
-  .dropzone::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: radial-gradient(ellipse 70% 60% at 50% 110%, rgba(126,211,33,0.06), transparent 70%);
-    pointer-events: none;
-  }
-
-  .dropzone::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: radial-gradient(ellipse 70% 60% at 50% 50%, rgba(126,211,33,0.10), transparent);
-    opacity: 0;
-    transition: opacity 0.3s;
-    pointer-events: none;
-  }
-
-  .dropzone:hover,
-  .dropzone.drag-over {
-    border-color: rgba(126,211,33,0.5);
-    border-style: solid;
-    transform: translateY(-1px);
-    box-shadow: 0 8px 32px rgba(126,211,33,0.08), 0 0 0 3px rgba(126,211,33,0.06);
-  }
-
-  .dropzone:hover::after,
-  .dropzone.drag-over::after { opacity: 1; }
-
-  .dropzone-icon-wrap {
-    width: 56px;
-    height: 56px;
-    border-radius: 16px;
-    background: rgba(126,211,33,0.1);
-    border: 1px solid rgba(126,211,33,0.2);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 0 auto 18px;
-    position: relative;
-    z-index: 1;
-    transition: transform 0.2s, background 0.2s;
-  }
-
-  .dropzone:hover .dropzone-icon-wrap {
-    background: rgba(126,211,33,0.15);
-    transform: translateY(-2px);
-  }
-
-  .dropzone-icon {
-    width: 26px;
-    height: 26px;
-    color: var(--teal);
-  }
-
-  .dropzone p { margin: 5px 0; color: var(--text); position: relative; z-index: 1; }
-  .dropzone p strong { color: var(--text); font-size: 15px; font-weight: 700; }
-  .dropzone .hint {
-    color: var(--text-soft);
-    font-size: 12.5px;
-    margin-top: 8px;
-    font-family: 'Fira Code', monospace;
-  }
-
-  /* ── BUTTON ──────────────────────────────────────────────────── */
-  .btn {
-    background: var(--teal);
-    color: #05120d;
-    border: none;
-    padding: 13px 26px;
-    border-radius: 50px;
-    font-size: 14px;
-    font-weight: 700;
-    font-family: 'Sora', sans-serif;
-    cursor: pointer;
-    transition: all 0.2s;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    letter-spacing: 0.1px;
-    box-shadow: 0 4px 16px rgba(126,211,33,0.25);
-  }
-
-  .btn:hover {
-    background: var(--teal-bright);
-    transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(126,211,33,0.35);
-  }
-
-  .btn-secondary {
-    background: var(--bg-elevated);
-    color: var(--text-muted);
-    border: 1px solid var(--border);
-    padding: 9px 18px;
-    font-size: 13px;
-    box-shadow: none;
-  }
-
-  .btn-secondary:hover {
-    background: var(--border);
-    color: var(--text);
-    transform: none;
-    box-shadow: none;
-  }
-
-  /* ── STATS SUMMARY ───────────────────────────────────────────── */
-  .summary {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 10px;
-    margin-bottom: 24px;
-  }
-
-  .stat {
-    padding: 18px 14px 16px;
-    border-radius: 14px;
-    text-align: center;
-    border: 1px solid var(--border-soft);
-    background: var(--bg-card-2);
-    transition: transform 0.2s, box-shadow 0.2s;
-    position: relative;
-    overflow: hidden;
-  }
-
-  .stat::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 2px;
-    border-radius: 14px 14px 0 0;
-    opacity: 0;
-    transition: opacity 0.2s;
-  }
-
-  .stat:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.3); }
-  .stat:hover::before { opacity: 1; }
-
-  .stat-icon {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 30px;
-    height: 30px;
-    border-radius: 8px;
-    margin: 0 auto 10px;
-  }
-
-  .stat-num {
-    font-family: 'Fira Code', monospace;
-    font-size: 32px;
-    font-weight: 700;
-    line-height: 1;
-    letter-spacing: -1px;
-  }
-
-  .stat-label {
-    font-size: 10.5px;
-    margin-top: 6px;
-    color: var(--text-muted);
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-  }
-
-  .stat-total  { border-color: rgba(255,255,255,0.06); }
-  .stat-total::before { background: rgba(255,255,255,0.15); }
-  .stat-total .stat-num  { color: var(--text); }
-  .stat-total .stat-icon { background: rgba(255,255,255,0.05); color: var(--text-muted); }
-
-  .stat-ok     { border-color: rgba(126,211,33,0.18); background: rgba(126,211,33,0.05); }
-  .stat-ok::before { background: var(--teal); }
-  .stat-ok .stat-num     { color: var(--teal-bright); }
-  .stat-ok .stat-icon { background: rgba(126,211,33,0.12); color: var(--teal); }
-
-  .stat-warning { border-color: rgba(255,179,71,0.18); background: rgba(255,179,71,0.04); }
-  .stat-warning::before { background: var(--warning); }
+  .step-item.active { border-color: rgba(126,211,33,0.3); background: rgba(126,211,33,0.08); color: #95E844; }
+  .step-arrow { color: var(--text-soft); font-size: 11px; flex-shrink: 0; }
+  /* ── FORMAT PILLS ───────────────────────────────────────────── */
+  .format-pills { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; margin-top: 12px; }
+  .pill { font-size: 10px; font-weight: 700; font-family: 'Fira Code', monospace; letter-spacing: 0.5px; padding: 3px 10px; border-radius: 99px; background: var(--bg-elevated); border: 1px solid var(--border); color: var(--text-soft); text-transform: uppercase; }
+  h1 { font-size: 22px; font-weight: 600; color: var(--text); margin: 18px 0 6px; }
+  .subtitle { color: var(--text-muted); font-size: 15px; margin: 0; max-width: 620px; }
+  .card { background: var(--bg-card); border: 1px solid var(--border-soft); border-radius: 14px; padding: 26px; margin-bottom: 18px; box-shadow: 0 1px 3px rgba(0,0,0,0.4); }
+  .dropzone { border: 2px dashed var(--border); border-radius: 12px; padding: 56px 20px; text-align: center; cursor: pointer; transition: all 0.2s ease; background: var(--bg-card-2); }
+  .dropzone:hover, .dropzone.drag-over { border-color: var(--green); background: var(--green-soft); transform: translateY(-1px); }
+  .dropzone-icon { width: 64px; height: 64px; margin: 0 auto 14px; color: var(--green); }
+  .dropzone p { margin: 6px 0; color: var(--text); }
+  .dropzone p strong { color: var(--green-bright); font-size: 17px; }
+  .dropzone .hint { color: var(--text-muted); font-size: 14px; }
+  .btn { background: var(--green); color: #0a0a0a; border: none; padding: 12px 22px; border-radius: 9px; font-size: 15px; font-weight: 700; cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; gap: 8px; letter-spacing: 0.2px; }
+  .btn:hover { background: var(--green-bright); transform: translateY(-1px); box-shadow: 0 4px 14px rgba(126, 211, 33, 0.25); }
+  .btn-secondary { background: var(--bg-card-2); color: var(--text-muted); border: 1px solid var(--border); padding: 8px 14px; font-size: 13px; font-weight: 600; }
+  .btn-secondary:hover { background: var(--border); color: var(--text); box-shadow: none; }
+  .summary { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 22px; }
+  .stat { padding: 18px 12px; border-radius: 10px; text-align: center; border: 1px solid var(--border-soft); background: var(--bg-card-2); }
+  .stat-total .stat-num { color: var(--text); }
+  .stat-ok .stat-num { color: var(--green-bright); }
   .stat-warning .stat-num { color: var(--warning); }
-  .stat-warning .stat-icon { background: rgba(255,179,71,0.12); color: var(--warning); }
-
-  .stat-error  { border-color: rgba(255,77,109,0.18); background: rgba(255,77,109,0.04); }
-  .stat-error::before { background: var(--error); }
-  .stat-error .stat-num  { color: var(--error); }
-  .stat-error .stat-icon { background: rgba(255,77,109,0.12); color: var(--error); }
-
-  /* ── ERRORS LIST ─────────────────────────────────────────────── */
+  .stat-error .stat-num { color: var(--error); }
+  .stat-num { font-size: 30px; font-weight: 800; line-height: 1; }
+  .stat-label { font-size: 12px; margin-top: 6px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
   .errors-list { max-height: 480px; overflow-y: auto; padding-right: 4px; }
-  .errors-list::-webkit-scrollbar { width: 6px; }
-  .errors-list::-webkit-scrollbar-track { background: var(--bg-card-2); border-radius: 3px; }
-  .errors-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
-
-  .error-row {
-    padding: 14px 18px;
-    margin-bottom: 10px;
-    border-radius: 12px;
-    border-left: 3px solid;
-    background: var(--bg-card-2);
-    transition: background 0.15s;
-  }
-
-  .error-row:hover { background: var(--bg-elevated); }
-  .error-row.error  { background: var(--error-soft); border-color: var(--error); }
-  .error-row.warning { background: var(--warning-soft); border-color: var(--warning); }
-
-  .error-row .row-title {
-    font-weight: 700;
-    color: var(--text);
-    margin-bottom: 8px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    flex-wrap: wrap;
-    font-size: 13.5px;
-  }
-
+  .errors-list::-webkit-scrollbar { width: 8px; }
+  .errors-list::-webkit-scrollbar-track { background: var(--bg-card-2); border-radius: 4px; }
+  .errors-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+  .error-row { padding: 14px 16px; margin-bottom: 10px; border-radius: 10px; border-left: 4px solid; background: var(--bg-card-2); }
+  .error-row.error { background: var(--error-bg); border-color: var(--error); }
+  .error-row.warning { background: var(--warning-bg); border-color: var(--warning); }
+  .error-row .row-title { font-weight: 700; color: var(--text); margin-bottom: 8px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 14px; }
   .row-name { color: var(--text-muted); font-weight: 500; }
-
-  .badge {
-    display: inline-block;
-    padding: 2px 9px;
-    border-radius: 99px;
-    font-size: 10px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-  }
-
-  .badge-error   { background: rgba(255,77,109,0.2);  color: #ff8fa3; border: 1px solid rgba(255,77,109,0.3); }
-  .badge-warning { background: rgba(255,179,71,0.2); color: #ffd180; border: 1px solid rgba(255,179,71,0.3); }
-
-  .issue {
-    display: block;
-    padding: 4px 0 4px 20px;
-    position: relative;
-    font-size: 13px;
-    color: var(--text-muted);
-    line-height: 1.5;
-  }
-
-  .issue::before {
-    content: '';
-    position: absolute;
-    left: 6px;
-    top: 11px;
-    width: 5px;
-    height: 5px;
-    border-radius: 50%;
-  }
-
-  .issue.err  { color: #ffacba; }
-  .issue.err::before  { background: var(--error); }
-  .issue.warn { color: #ffd69e; }
+  .badge { display: inline-block; padding: 3px 9px; border-radius: 12px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; }
+  .badge-error { background: var(--error); color: white; }
+  .badge-warning { background: var(--warning); color: #1a1a1a; }
+  .issue { display: block; padding: 4px 0; padding-left: 22px; position: relative; font-size: 13px; color: var(--text-muted); }
+  .issue::before { content: ''; position: absolute; left: 8px; top: 11px; width: 5px; height: 5px; border-radius: 50%; }
+  .issue.err { color: #fca5a5; }
+  .issue.err::before { background: var(--error); }
+  .issue.warn { color: #fcd34d; }
   .issue.warn::before { background: var(--warning); }
-
-  /* ── TABLE ───────────────────────────────────────────────────── */
-  table { width: 100%; border-collapse: collapse; font-size: 12px; }
-
-  th {
-    background: #070910;
-    color: var(--teal);
-    padding: 10px 10px;
-    text-align: left;
-    border-bottom: 1px solid var(--border);
-    white-space: nowrap;
-    font-family: 'Fira Code', monospace;
-    font-weight: 600;
-    font-size: 10px;
-    letter-spacing: 0.5px;
-    text-transform: uppercase;
-    position: sticky;
-    top: 0;
-    z-index: 2;
-  }
-
-  td {
-    padding: 8px 10px;
-    border-bottom: 1px solid var(--border-soft);
-    white-space: nowrap;
-    max-width: 200px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    color: var(--text);
-    font-family: 'Fira Code', monospace;
-    font-size: 11.5px;
-  }
-
-  tr.row-error   td { background: var(--error-soft); }
-  tr.row-warning td { background: var(--warning-soft); }
-  tr:hover       td { background: var(--bg-elevated); }
-  tr.row-error:hover   td { background: rgba(255,77,109,0.12); }
-  tr.row-warning:hover td { background: rgba(255,179,71,0.12); }
-
-  .preview-wrap {
-    overflow: auto;
-    max-height: 380px;
-    border: 1px solid var(--border-soft);
-    border-radius: 10px;
-    background: var(--bg-card-2);
-  }
-
-  .preview-wrap::-webkit-scrollbar { height: 6px; width: 6px; }
+  table { width: 100%; border-collapse: collapse; font-size: 12px; color: var(--text); }
+  th { background: #0a0c0e; color: var(--green-bright); padding: 10px 8px; text-align: left; border-bottom: 1px solid var(--border); white-space: nowrap; font-weight: 700; font-size: 10px; letter-spacing: 0.6px; text-transform: uppercase; position: sticky; top: 0; }
+  td { padding: 8px; border-bottom: 1px solid var(--border-soft); white-space: nowrap; max-width: 200px; overflow: hidden; text-overflow: ellipsis; color: var(--text); }
+  tr.row-error td { background: var(--error-bg); }
+  tr.row-warning td { background: var(--warning-bg); }
+  tr:hover td { background: var(--bg-card-2); }
+  tr.row-error:hover td { background: rgba(239, 68, 68, 0.15); }
+  tr.row-warning:hover td { background: rgba(245, 158, 11, 0.15); }
+  .preview-wrap { overflow: auto; max-height: 380px; border: 1px solid var(--border-soft); border-radius: 8px; background: var(--bg-card-2); }
+  .preview-wrap::-webkit-scrollbar { height: 8px; width: 8px; }
   .preview-wrap::-webkit-scrollbar-track { background: var(--bg-card); }
-  .preview-wrap::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
-
-  /* ── MISC COMPONENTS ─────────────────────────────────────────── */
-  .actions {
-    display: flex;
-    gap: 12px;
-    flex-wrap: wrap;
-    align-items: center;
-    padding-top: 4px;
-  }
-
-  .file-info {
-    background: var(--bg-card-2);
-    border: 1px solid var(--border-soft);
-    padding: 10px 16px;
-    border-radius: 10px;
-    margin-bottom: 20px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 10px;
-  }
-
-  .file-info-name {
-    font-weight: 600;
-    color: var(--teal-bright);
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 13px;
-    font-family: 'Fira Code', monospace;
-  }
-
-  .divider {
-    height: 1px;
-    background: var(--border-soft);
-    margin: 22px 0;
-  }
-
+  .preview-wrap::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+  .actions { display: flex; gap: 14px; flex-wrap: wrap; align-items: center; }
+  .file-info { background: var(--bg-card-2); border: 1px solid var(--border-soft); padding: 12px 16px; border-radius: 8px; margin-bottom: 18px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+  .file-info-name { font-weight: 600; color: var(--green-bright); display: flex; align-items: center; gap: 8px; font-size: 14px; }
   .hidden { display: none !important; }
-
-  h3 {
-    margin-top: 0;
-    color: var(--text);
-    font-size: 16px;
-    font-weight: 700;
-    margin-bottom: 6px;
-    letter-spacing: -0.2px;
-  }
-
-  .info-text {
-    color: var(--text-muted);
-    font-size: 13.5px;
-    margin: 0 0 16px;
-    line-height: 1.6;
-  }
-
-  .mapping-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
-    gap: 8px;
-    font-size: 13px;
-  }
-
-  .mapping-item {
-    padding: 10px 14px;
-    background: var(--bg-card-2);
-    border-radius: 8px;
-    border-left: 3px solid var(--border);
-    transition: background 0.15s;
-  }
-
-  .mapping-item:hover { background: var(--bg-elevated); }
-  .mapping-item.found   { border-left-color: var(--teal); }
-  .mapping-item.missing { border-left-color: var(--error); background: var(--error-soft); }
-  .mapping-item .label  { font-weight: 700; color: var(--text); font-size: 12.5px; font-family: 'Fira Code', monospace; }
-  .mapping-item .source { color: var(--text-muted); font-size: 11.5px; margin-top: 3px; }
-
-  /* ── TEMPLATE BUTTON ────────────────────────────────────────── */
-  .template-row {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    margin-top: 20px;
-    flex-wrap: wrap;
-  }
-
-  .btn-template {
-    background: transparent;
-    color: var(--teal);
-    border: 1px solid rgba(126, 211, 33, 0.35);
-    padding: 10px 20px;
-    font-size: 13px;
-    font-weight: 600;
-    box-shadow: none;
-    border-radius: 50px;
-  }
-
-  .btn-template:hover {
-    background: var(--teal-soft);
-    border-color: var(--teal);
-    transform: translateY(-1px);
-    box-shadow: 0 4px 14px rgba(126, 211, 33, 0.15);
-  }
-
-  .template-hint {
-    font-size: 12px;
-    color: var(--text-soft);
-  }
-
-  /* ── DETAILS/ACCORDION ───────────────────────────────────────── */
-  details { margin-top: 16px; }
-
-  details summary {
-    cursor: pointer;
-    color: var(--teal);
-    font-weight: 500;
-    padding: 8px 0;
-    font-size: 13.5px;
-    list-style: none;
-    user-select: none;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
-
+  h3 { margin-top: 0; color: var(--text); font-size: 17px; font-weight: 700; }
+  .info-text { color: var(--text-muted); font-size: 13.5px; margin: 0 0 14px; line-height: 1.5; }
+  .mapping-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 8px; font-size: 13px; }
+  .mapping-item { padding: 8px 12px; background: var(--bg-card-2); border-radius: 6px; border-left: 3px solid var(--border); }
+  .mapping-item.found { border-left-color: var(--green); }
+  .mapping-item.missing { border-left-color: var(--error); background: var(--error-bg); }
+  .mapping-item .label { font-weight: 700; color: var(--text); font-size: 13px; }
+  .mapping-item .source { color: var(--text-muted); font-size: 11.5px; margin-top: 2px; }
+  details { margin-top: 14px; }
+  details summary { cursor: pointer; color: var(--green); font-weight: 500; padding: 6px 0; font-size: 14px; list-style: none; user-select: none; }
   details summary::-webkit-details-marker { display: none; }
-
-  details summary::before {
-    content: '▸';
-    font-size: 11px;
-    transition: transform 0.2s;
-    display: inline-block;
-  }
-
-  details[open] summary::before { transform: rotate(90deg); }
-  details summary:hover { color: var(--teal-bright); }
-
-  details > div {
-    color: var(--text-muted);
-    font-size: 13.5px;
-    padding: 10px 0 4px 18px;
-    line-height: 1.65;
-  }
-
+  details summary::before { content: '▸ '; }
+  details[open] summary::before { content: '▾ '; }
+  details summary:hover { color: var(--green-bright); }
+  details > div { color: var(--text-muted); font-size: 13px; padding: 10px 0 0; line-height: 1.6; }
   details strong { color: var(--text); }
-
-  /* ── PROGRESS ────────────────────────────────────────────────── */
-  .progress-card { text-align: center; padding: 64px 24px; }
-
-  .spinner-wrap {
-    position: relative;
-    width: 52px;
-    height: 52px;
-    margin: 0 auto 20px;
-  }
-
-  .spinner-track {
-    width: 52px;
-    height: 52px;
-    border: 2.5px solid var(--border);
-    border-radius: 50%;
-    position: absolute;
-    inset: 0;
-  }
-
-  .spinner {
-    width: 52px;
-    height: 52px;
-    border: 2.5px solid transparent;
-    border-top-color: var(--teal);
-    border-right-color: rgba(126,211,33,0.4);
-    border-radius: 50%;
-    animation: spin 0.85s ease-in-out infinite;
-    position: absolute;
-    inset: 0;
-    filter: drop-shadow(0 0 6px rgba(126,211,33,0.5));
-  }
-
-  @keyframes spin { to { transform: rotate(360deg); } }
-
-  .progress-text {
-    color: var(--text);
-    font-size: 15px;
-    font-weight: 600;
-    margin: 0 0 6px;
-  }
-
-  .progress-sub {
-    color: var(--text-muted);
-    font-size: 13px;
-    font-family: 'Fira Code', monospace;
-  }
-
-  /* ── FOOTER ──────────────────────────────────────────────────── */
-  footer {
-    text-align: center;
-    color: var(--text-soft);
-    font-size: 12px;
-    margin-top: 24px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-  }
-
+  footer { text-align: center; color: var(--text-soft); font-size: 12px; margin-top: 24px; display: flex; align-items: center; justify-content: center; gap: 8px; }
   footer .dot { color: var(--border); }
-  footer .local-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    background: var(--teal-soft);
-    border: 1px solid rgba(126,211,33,0.15);
-    border-radius: 99px;
-    padding: 3px 10px;
-    font-size: 11px;
-    font-weight: 600;
-    color: rgba(126,211,33,0.7);
-    letter-spacing: 0.2px;
-  }
-
-  /* ── ANIMATIONS ──────────────────────────────────────────────── */
-  @keyframes fadeUp {
-    from { opacity: 0; transform: translateY(16px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
-
-  .card:nth-child(1) { animation-delay: 0.05s; }
-  .card:nth-child(2) { animation-delay: 0.10s; }
-  .card:nth-child(3) { animation-delay: 0.15s; }
-
-  /* ── RESPONSIVE ──────────────────────────────────────────────── */
-  @media (max-width: 640px) {
-    .summary { grid-template-columns: repeat(2, 1fr); }
-    .card { padding: 20px; }
-    header h1, .h1-main { font-size: 24px; }
-    .h1-sub { font-size: 16px; }
-    .stat-num { font-size: 26px; }
-    .steps-flow { flex-wrap: wrap; justify-content: center; }
-  }
-
-  /* ── SCROLLBAR (Firefox) ─────────────────────────────────────── */
-  * { scrollbar-width: thin; scrollbar-color: var(--border) var(--bg-card-2); }
-
-  /* ── SECTION LABEL ───────────────────────────────────────────── */
-  .section-label {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 18px;
-  }
-
-  .section-label h3 { margin: 0; }
-
-  .section-label .label-badge {
-    font-size: 10px;
-    font-family: 'Fira Code', monospace;
-    font-weight: 600;
-    padding: 3px 10px;
-    border-radius: 99px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-  }
-
-  .label-badge-error   { background: var(--error-soft); color: #ff8fa3; border: 1px solid rgba(255,77,109,0.2); }
-  .label-badge-warning { background: var(--warning-soft); color: #ffd180; border: 1px solid rgba(255,179,71,0.2); }
-  .label-badge-info    { background: var(--violet-soft); color: #b8adff; border: 1px solid rgba(123,97,255,0.2); }
+  footer .local-badge { display: inline-flex; align-items: center; gap: 5px; background: rgba(126,211,33,0.08); border: 1px solid rgba(126,211,33,0.15); border-radius: 99px; padding: 3px 10px; font-size: 11px; font-weight: 600; color: rgba(126,211,33,0.7); }
+  @media (max-width: 640px) { .summary { grid-template-columns: repeat(2, 1fr); } .card { padding: 20px; } header h1, .h1-main { font-size: 24px; } .h1-sub { font-size: 16px; } .steps-flow { flex-wrap: wrap; justify-content: center; } }
+  /* Progresso de carregamento */
+  .progress-card { text-align: center; padding: 56px 24px; }
+  .spinner { width: 44px; height: 44px; border: 3px solid var(--border); border-top-color: var(--green); border-radius: 50%; animation: spin 0.75s linear infinite; margin: 0 auto 18px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .progress-text { color: var(--text-muted); font-size: 15px; margin: 0 0 6px; font-weight: 500; }
+  .progress-sub  { color: var(--text-soft); font-size: 12px; margin: 0; }
 </style>
 </head>
 <body>
 <div class="container">
-
   <header>
     <div class="app-icon-wrap">
       <div class="app-icon-bg"></div>
@@ -831,139 +180,90 @@
     </div>
   </header>
 
-  <!-- Progress -->
   <div id="progress-section" class="card progress-card hidden">
-    <div class="spinner-wrap">
-      <div class="spinner-track"></div>
-      <div class="spinner"></div>
-    </div>
+    <div class="spinner"></div>
     <p class="progress-text" id="progress-text">Processando planilha...</p>
     <p class="progress-sub"  id="progress-sub"></p>
   </div>
 
-  <!-- Upload -->
   <div id="upload-section" class="card">
     <div id="dropzone" class="dropzone">
-      <div class="dropzone-icon-wrap">
-        <svg class="dropzone-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-          <rect x="3" y="3" width="18" height="18" rx="3" opacity="0.3"/>
-          <path d="M12 16V8M8 12l4-4 4 4"/>
-          <path d="M3 17v2a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-2" opacity="0.5"/>
-        </svg>
-      </div>
+      <svg class="dropzone-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+        <polyline points="17 8 12 3 7 8"/>
+        <line x1="12" y1="3" x2="12" y2="15"/>
+      </svg>
       <p><strong>Clique aqui ou arraste sua planilha</strong></p>
-      <p class="hint">Formatos aceitos: .csv · .xlsx · .xls</p>
+      <p class="hint">Formatos aceitos: .csv, .xlsx, .xls</p>
       <input type="file" id="file-input" class="hidden" accept=".csv,.xlsx,.xls">
     </div>
-
-    <div class="template-row">
-      <button class="btn btn-template" onclick="downloadTemplate()">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
-        Baixar modelo de preenchimento
-      </button>
-      <span class="template-hint">Planilha com cabeçalho e linha de exemplo</span>
-    </div>
-
     <details>
       <summary>Quais colunas a planilha precisa ter?</summary>
       <div>
         <p>A ferramenta reconhece automaticamente colunas com os seguintes nomes (ou variações com acento, caixa alta/baixa, espaços):</p>
-        <p style="margin-top:10px;"><strong>NOME</strong>, <strong>CPF/CNPJ</strong>, <strong>NOME_MAE</strong>, <strong>DATA_NASCIMENTO</strong>, <strong>E-MAIL</strong>, <strong>CELULAR</strong>, <strong>SALARIO</strong>, <strong>LOTACAO</strong>, <strong>CEP</strong>, <strong>PAIS</strong>, <strong>ESTADO</strong>, <strong>CIDADE</strong>, <strong>BAIRRO</strong>, <strong>RUA</strong>, <strong>NUMERO</strong>, <strong>COMPLEMENTO</strong>, <strong>DATA_ADMISSAO</strong>.</p>
-        <p style="margin-top:8px;">Correções automáticas: coluna OPERACAO sempre vira "NOVO"; estados como "São Paulo" viram "SP"; país em branco vira "BRASIL"; acentos e cedilha são removidos do NOME e NOME_MAE; endereços são validados via ViaCEP.</p>
+        <p><strong>NOME</strong>, <strong>CPF/CNPJ</strong>, <strong>NOME_MAE</strong>, <strong>DATA_NASCIMENTO</strong>, <strong>E-MAIL</strong>, <strong>CELULAR</strong>, <strong>SALARIO</strong>, <strong>LOTACAO</strong>, <strong>CEP</strong>, <strong>PAIS</strong>, <strong>ESTADO</strong>, <strong>CIDADE</strong>, <strong>BAIRRO</strong>, <strong>RUA</strong>, <strong>NUMERO</strong>, <strong>COMPLEMENTO</strong>, <strong>DATA_ADMISSAO</strong>.</p>
+        <p>Correções automáticas: coluna OPERACAO sempre vira "NOVO"; estados como "São Paulo" viram "SP"; país em branco vira "BRASIL"; acentos e cedilha são removidos do resultado final. Lotação é opcional.</p>
       </div>
     </details>
   </div>
 
-  <!-- Results -->
   <div id="result-section" class="hidden">
-
     <div class="card">
       <div class="file-info">
         <div class="file-info-name">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
           <span id="file-name"></span>
         </div>
         <button class="btn btn-secondary" onclick="resetApp()">Trocar arquivo</button>
       </div>
 
       <div class="summary">
-        <div class="stat stat-total">
-          <div class="stat-icon">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-          </div>
-          <div class="stat-num" id="stat-total">0</div>
-          <div class="stat-label">Total de linhas</div>
-        </div>
-        <div class="stat stat-ok">
-          <div class="stat-icon">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-          </div>
-          <div class="stat-num" id="stat-ok">0</div>
-          <div class="stat-label">Sem problemas</div>
-        </div>
-        <div class="stat stat-warning">
-          <div class="stat-icon">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-          </div>
-          <div class="stat-num" id="stat-warning">0</div>
-          <div class="stat-label">Com avisos</div>
-        </div>
-        <div class="stat stat-error">
-          <div class="stat-icon">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
-          </div>
-          <div class="stat-num" id="stat-error">0</div>
-          <div class="stat-label">Com erros</div>
-        </div>
+        <div class="stat stat-total"><div class="stat-num" id="stat-total">0</div><div class="stat-label">Total de linhas</div></div>
+        <div class="stat stat-ok"><div class="stat-num" id="stat-ok">0</div><div class="stat-label">Sem problemas</div></div>
+        <div class="stat stat-warning"><div class="stat-num" id="stat-warning">0</div><div class="stat-label">Com avisos</div></div>
+        <div class="stat stat-error"><div class="stat-num" id="stat-error">0</div><div class="stat-label">Com erros</div></div>
       </div>
 
       <div class="actions">
         <button class="btn" onclick="downloadCSV()">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
           Baixar CSV formatado
         </button>
-        <span id="download-hint" style="font-size:13px; font-weight:500;"></span>
+        <button class="btn btn-secondary" onclick="downloadReport()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+          Baixar relatório de status
+        </button>
+        <span id="download-hint" style="font-size:13px;"></span>
       </div>
     </div>
 
     <div id="mapping-section" class="card hidden">
-      <div class="section-label">
-        <h3>Mapeamento de colunas</h3>
-        <span class="label-badge label-badge-info">detectado</span>
-      </div>
+      <h3>Mapeamento de colunas detectado</h3>
       <p class="info-text">Confira se todas as colunas da planilha foram reconhecidas corretamente.</p>
       <div id="mapping-grid" class="mapping-grid"></div>
     </div>
 
     <div id="errors-section" class="card hidden">
-      <div class="section-label">
-        <h3>Problemas encontrados</h3>
-        <span class="label-badge label-badge-error">atenção</span>
-      </div>
-      <p class="info-text">O arquivo final é gerado mesmo com avisos, mas é recomendado corrigir os erros antes de enviar.</p>
+      <h3>Problemas encontrados</h3>
+      <p class="info-text">Revise as linhas abaixo. O arquivo final será gerado mesmo com avisos, mas é recomendado corrigir os erros antes de enviar.</p>
       <div id="errors-list" class="errors-list"></div>
     </div>
 
     <div class="card">
-      <div class="section-label">
-        <h3>Pré-visualização do resultado</h3>
-        <span class="label-badge label-badge-info">preview</span>
-      </div>
-      <p class="info-text">Linhas em vermelho contêm erros · linhas em amarelo contêm avisos automáticos.</p>
+      <h3>Pré-visualização do resultado</h3>
+      <p class="info-text">Linhas em vermelho contêm erros, em amarelo contêm avisos.</p>
       <div class="preview-wrap"><table id="preview-table"></table></div>
     </div>
-
   </div>
 
   <footer>
     <span class="local-badge">
-      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
       100% local
     </span>
     <span class="dot">·</span>
     <span>Nenhum dado é enviado para servidores</span>
   </footer>
-
 </div>
 
 <script>
@@ -1142,6 +442,7 @@ function processRow(rawRow, headerMap, rowIndex) {
     if (v == null) return '';
     if (v instanceof Date) return formatDate(v);
     if (typeof v === 'number') {
+      // Mantém número como string sem notação científica (importante para CPF/CEP)
       if (Number.isInteger(v)) return String(v);
       return String(v);
     }
@@ -1162,9 +463,13 @@ function processRow(rawRow, headerMap, rowIndex) {
   let cpf = get('CPF/CNPJ').replace(/\D/g, '');
   if (!cpf) {
     errors.push('CPF/CNPJ não preenchido');
-  } else if (cpf.length === 10) {
-    cpf = '0' + cpf;
+  } else if (cpf.length < 11) {
+    // Preenche com zeros à esquerda até completar 11 dígitos (CPF)
+    const original = cpf;
+    cpf = cpf.padStart(11, '0');
+    warnings.push('CPF completado com zeros à esquerda: "' + original + '" → "' + cpf + '"');
   } else if (cpf.length === 13) {
+    // CNPJ com zero à esquerda removido — corrige silenciosamente
     cpf = '0' + cpf;
   } else if (cpf.length !== 11 && cpf.length !== 14) {
     errors.push('CPF/CNPJ com ' + cpf.length + ' dígitos (esperado 11 para CPF ou 14 para CNPJ)');
@@ -1174,6 +479,7 @@ function processRow(rawRow, headerMap, rowIndex) {
   out['NOME_MAE'] = stripAccents(get('NOME_MAE')).toUpperCase();
   if (!out['NOME_MAE']) errors.push('Nome da mãe não preenchido');
 
+  // DATA_NASCIMENTO — usa raw para pegar Date object diretamente
   const dnRaw = getRaw('DATA_NASCIMENTO');
   if (dnRaw == null || dnRaw === '') {
     errors.push('Data de nascimento não preenchida');
@@ -1239,12 +545,14 @@ function processRow(rawRow, headerMap, rowIndex) {
     out['SALARIO'] = salario;
   }
 
+  // LOTACAO opcional
   out['LOTACAO'] = get('LOTACAO').toUpperCase();
 
   let cep = get('CEP').replace(/\D/g, '');
   if (!cep) {
     errors.push('CEP não preenchido');
   } else if (cep.length < 8 && cep.length >= 5) {
+    // Excel removeu zeros à esquerda — corrige silenciosamente
     cep = cep.padStart(8, '0');
   } else if (cep.length !== 8) {
     errors.push('CEP com ' + cep.length + ' dígitos (esperado 8)');
@@ -1287,6 +595,7 @@ function processRow(rawRow, headerMap, rowIndex) {
   if (!out['NUMERO']) errors.push('Número do endereço não preenchido');
   out['COMPLEMENTO'] = get('COMPLEMENTO');
 
+  // DATA_ADMISSAO — usa raw para pegar Date object diretamente
   const daRaw = getRaw('DATA_ADMISSAO');
   if (daRaw == null || daRaw === '') {
     errors.push('Data de admissão não preenchida');
@@ -1331,6 +640,7 @@ function detectSeparator(text) {
   return ',';
 }
 
+
 // ── Validação de CEP via ViaCEP ───────────────────────────────────────────────
 const _cepCache = {};
 
@@ -1343,7 +653,7 @@ async function fetchCEP(cep) {
     _cepCache[cep] = data.erro ? null : data;
     return _cepCache[cep];
   } catch {
-    _cepCache[cep] = undefined;
+    _cepCache[cep] = undefined; // falha de rede — não cacheia como "inexistente"
     return undefined;
   }
 }
@@ -1370,19 +680,22 @@ async function validateCEPs(results) {
     const data = cepMap[cep];
 
     if (data === null) {
+      // CEP não encontrado na base dos Correios
       r.errors.push('CEP ' + cep + ' não encontrado na base dos Correios — verifique o número');
       return;
     }
-    if (data === undefined || data === null) return;
+    if (data === undefined || data === null) return; // falha de rede — não penaliza
 
     const corrections = [];
 
+    // Estado / UF
     const apiUF = (data.uf || '').toUpperCase();
     if (apiUF && r.out['ESTADO'] !== apiUF) {
       corrections.push('Estado: ' + (r.out['ESTADO'] || '(vazio)') + ' → ' + apiUF);
       r.out['ESTADO'] = apiUF;
     }
 
+    // Cidade — aplica com acentos (ViaCEP), compara via stripAccents para detectar diferença
     const apiCidade = (data.localidade || '').toUpperCase();
     if (apiCidade) {
       const cidadeAtual = stripAccents(r.out['CIDADE'] || '').toUpperCase();
@@ -1393,6 +706,7 @@ async function validateCEPs(results) {
       }
     }
 
+    // Bairro — aplica com acentos, compara via stripAccents
     const apiBairro = (data.bairro || '').toUpperCase();
     if (apiBairro) {
       const bairroAtual = stripAccents(r.out['BAIRRO'] || '').toUpperCase();
@@ -1403,6 +717,7 @@ async function validateCEPs(results) {
       }
     }
 
+    // Logradouro/Rua — aplica com acentos, compara via stripAccents
     const apiRua = (data.logradouro || '').toUpperCase();
     if (apiRua) {
       const ruaAtual = stripAccents(r.out['RUA'] || '').toUpperCase();
@@ -1431,13 +746,12 @@ async function handleFile(file) {
   const ext = (file.name.split('.').pop() || '').toLowerCase();
   let rows;
 
-  setActiveStep(1);
+  // Exibe progresso
   document.getElementById('upload-section').classList.add('hidden');
   document.getElementById('progress-section').classList.remove('hidden');
   setProgress('Lendo arquivo...');
 
   function abortLoad(msg) {
-    setActiveStep(0);
     document.getElementById('progress-section').classList.add('hidden');
     document.getElementById('upload-section').classList.remove('hidden');
     if (msg) alert(msg);
@@ -1485,20 +799,14 @@ async function handleFile(file) {
   setProgress('Validando campos...', dataRows.length + ' linhas encontradas');
   processedResults = dataRows.map((row, i) => processRow(row, detectedMap, i + headerIdx + 2));
 
+  // Fase assíncrona: validação de CEPs via ViaCEP
   await validateCEPs(processedResults);
 
   document.getElementById('progress-section').classList.add('hidden');
   renderResults();
 }
 
-function setActiveStep(index) {
-  document.querySelectorAll('.step-item').forEach((el, i) => {
-    el.classList.toggle('active', i === index);
-  });
-}
-
 function renderResults() {
-  setActiveStep(2);
   document.getElementById('upload-section').classList.add('hidden');
   document.getElementById('result-section').classList.remove('hidden');
   document.getElementById('file-name').textContent = originalFileName;
@@ -1516,13 +824,13 @@ function renderResults() {
   const hint = document.getElementById('download-hint');
   if (withErrors > 0) {
     hint.textContent = '⚠ Há linhas com erros — recomendamos corrigir antes de enviar';
-    hint.style.color = '#ff8fa3';
+    hint.style.color = '#fca5a5';
   } else if (withWarnings > 0) {
     hint.textContent = '✓ Pronto para baixar — alguns ajustes automáticos foram aplicados';
-    hint.style.color = '#ffd180';
+    hint.style.color = '#fcd34d';
   } else {
     hint.textContent = '✓ Todos os registros estão íntegros';
-    hint.style.color = 'var(--teal-bright)';
+    hint.style.color = 'var(--green-bright)';
   }
 
   renderMapping();
@@ -1564,7 +872,7 @@ function renderErrors() {
     div.className = cls;
     let html = '<div class="row-title">';
     html += '<span>Linha ' + r.rowIndex + '</span>';
-    html += '<span class="row-name">' + escapeHtml(r.name) + '</span>';
+    html += '<span class="row-name">— ' + escapeHtml(r.name) + '</span>';
     if (r.errors.length > 0) html += '<span class="badge badge-error">' + r.errors.length + ' erro' + (r.errors.length > 1 ? 's' : '') + '</span>';
     if (r.warnings.length > 0) html += '<span class="badge badge-warning">' + r.warnings.length + ' aviso' + (r.warnings.length > 1 ? 's' : '') + '</span>';
     html += '</div>';
@@ -1616,6 +924,42 @@ function generateCSV() {
   return csv;
 }
 
+function downloadReport() {
+  const BOM = '\ufeff';
+  const sep = ';';
+  const escape = v => {
+    const s = String(v == null ? '' : v);
+    return s.includes(sep) || s.includes('"') || s.includes('\n')
+      ? '"' + s.replace(/"/g, '""') + '"' : s;
+  };
+  const header = ['NOME', 'CPF/CNPJ', 'STATUS', 'DETALHES'].join(sep);
+  const rows = processedResults.map(r => {
+    const nome  = escape(r.out['NOME'] || '');
+    const cpf   = escape(r.out['CPF/CNPJ'] || '');
+    let status, detalhes;
+    if (r.errors.length > 0) {
+      status   = 'COM ERROS';
+      detalhes = escape(r.errors.join(' | '));
+    } else if (r.warnings.length > 0) {
+      status   = 'COM AVISOS';
+      detalhes = escape(r.warnings.join(' | '));
+    } else {
+      status   = 'SEM PROBLEMAS';
+      detalhes = '';
+    }
+    return [nome, cpf, status, detalhes].join(sep);
+  });
+  const csv = BOM + header + '\r\n' + rows.join('\r\n') + '\r\n';
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href = url;
+  const baseName = originalFileName.replace(/\.[^.]+$/, '') || 'colaboradores';
+  a.download = baseName + '_relatorio_status.csv';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
 function downloadCSV() {
   const csv = generateCSV();
   const BOM = '﻿';
@@ -1631,44 +975,7 @@ function downloadCSV() {
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
-function downloadTemplate() {
-  const sep = ';';
-  const header = STANDARD_COLUMNS.join(sep);
-  const example = [
-    'NOVO',
-    'JOSE DA SILVA',
-    '12345678901',
-    'MARIA DA SILVA',
-    '15/06/1990',
-    'jose.silva@email.com',
-    '11987654321',
-    '2500,00',
-    '',
-    '01310100',
-    'BRASIL',
-    'SP',
-    'SÃO PAULO',
-    'BELA VISTA',
-    'AV PAULISTA',
-    '1000',
-    'APTO 42',
-    '01/06/2025'
-  ].join(sep);
-  const BOM = '﻿';
-  const csv = BOM + header + '\r\n' + example + '\r\n';
-  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = 'modelo_cadastro_colaboradores.csv';
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  setTimeout(() => URL.revokeObjectURL(url), 1000);
-}
-
 function resetApp() {
-  setActiveStep(0);
   document.getElementById('upload-section').classList.remove('hidden');
   document.getElementById('progress-section').classList.add('hidden');
   document.getElementById('result-section').classList.add('hidden');
